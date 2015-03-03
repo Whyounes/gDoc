@@ -1,0 +1,28 @@
+{
+    "name": "RAFIE/gDoc",
+    "description": "Documentation generator.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "RAFIE Younes",
+            "email": "younes.rafie@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "twig/twig": "~1.13",
+        "michelf/php-markdown": "~1.3",
+        "symfony/console": "~2.1",
+        "symfony/finder": "~2.1",
+        "illuminate/filesystem": "5.0.*",
+        "symfony/yaml": "~2.1",
+        "symfony/process": "~2.1",
+        "illuminate/container": "5.0.*",
+        "illuminate/support": "5.0.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "RAFIE\\": "RAFIE/"
+        }
+    }
+}
