@@ -1,8 +1,8 @@
 ##Documentation Generator
-API documentation is important, but an official documentation for your application functionnality is also important. I tried to adapt the [Sami documentation generator](https://github.com/FriendsOfPHP/Sami) to help generate official documentation.
+API documentation is important, but an official documentation for your application project is also important. I tried to adapt the [Sami documentation generator](https://github.com/FriendsOfPHP/Sami) to help generate official documentation.
 
 ##Installation
-You can require [rafie/gdoc]() in your `composer.json`and do an update.
+You can require [rafie/gdoc](https://packagist.org/packages/rafie/gdoc) in your `composer.json`and do a `composer update`.
 
 ##Usage
 You can run the documentation generator from the command line.
@@ -11,7 +11,7 @@ You can run the documentation generator from the command line.
 $ php path/to/rafie.php generate your_config.php
 ```
 
-Where the config file must return an instance of `RAFIE\Configuration`, this is an example.
+Where the config file must return an instance of `RAFIE\Configuration`, you may use the config file inside the root of the package, this is an example.
 
 ```php
 use RAFIE\Configuration;
@@ -75,24 +75,7 @@ return new Configuration($finder, $docConf, $options);
 The `GitVersionCollection` lets you specify which versions you want to use for the generation, and the result is passed as an option. Note that the build path contains a `%version%` which indicates the sub directory structure used for the output.
 
 ##Creating Themes
-To create a theme for your documentation, you need to create a folder that contains a `theme.yml' file.
- 
-```yml
-name: laravel
+You can this Github [repository](https://github.com/Whyounes/gDocThemes) to learn more about theme.
 
-assets:
-  - 'assets/css/laravel.css'
-  - 'assets/js/laravel.js'
-  - 'assets/img/laravel-logo.png'
-```
-
-The only required attribute is the `name` which will be passed as an option like we described previously. The `assets` define a list of assets needed by the documentation static files, those files are copied to the documentation build path using the same structure.
-Your theme must also contain a `page.twig` file which will be called with the following parameters.
-
-- 'rootPath': If you're using versioned docs, this attributes will hold the current one.
-- 'content': HTML parsed content.
-- 'assets': List of assets as specified in your theme file.
-- 'filename': The current parsed file name.
-- 'navigation': The list of navigation specified on your `doc.yml`. 
-
-The laravel theme inside the repository is an example theme that can be used as a reference.
+##Demo
+The [gDocDemo](https://github.com/Whyounes/gDocDemo) repository contain a demo for generating a documentation for Laravel framework, I'm using their CSS file and some of their HTML.
