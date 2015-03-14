@@ -154,7 +154,7 @@ class Project extends Container
     $this->copyAssets($buildPath);
 
     $iterator = $this->configuration->getFinder()->getIterator();
-    $navigation = $this->loadNavigation($this->configuration->getFinder());
+    $navigation = $this->loadNavigation();
 
     foreach ($iterator as $file) {
       $content = $this->parser->parse($file->getContents());
@@ -217,18 +217,39 @@ class Project extends Container
 
   }
 
+  protected function loadDocConfFile()
+  {
+    $docConfFile = $this->configuration->getDocConfFile();
+    if ($docConfFile instanceof Finder) {
+      $iterator = $docConfFile->getIterator();
+
+      if (count($iterator) == 0) {
+        throw new \InvalidArgumentException("The documentation configuration file was not found.");
+      }
+
+      $iterator->rewind();
+      $iterator->next();
+      return $iterator->current()->getRealPath();
+    } elseif (is_string($docConfFile)) {
+      if (!is_file($docConfFile)) {
+        throw new \InvalidArgumentException("The documentation configuration file was not found.");
+      }
+
+      return $docConfFile;
+    }
+  }
+
   /**
-   * @param \Symfony\Component\Finder\Finder $finder
    * @return array
    */
-  protected function loadNavigation($finder)
+  protected function loadNavigation()
   {
     // if doc.yml doesn't exist
-    $doc = (new Parser())->parse(file_get_contents($this->configuration->getDocConfFile()));
+    $doc = (new Parser())->parse(file_get_contents($this->loadDocConfFile()));
 
     if (!isset($doc['navigation'])) {
       $navigation = [];
-      $iterator = $finder->getIterator();
+      $iterator = $this->configuration->getFinder()->getIterator();
       foreach ($iterator as $item) {
         $navigation[$item->getRelativePathname()] = $item->getFilename();
       }

@@ -35,28 +35,7 @@ class Configuration
   {
     $this->finder = $finder;
     $this->options = $options;
-    $this->loadDocConfFile($docConfFile);
-  }
-
-  protected function loadDocConfFile($docConfFile){
-    if($docConfFile instanceof Finder){
-      $iterator = $docConfFile->getIterator();
-
-      if(count($iterator) == 0){
-        throw new \InvalidArgumentException("The documentation configuration file was not found.");
-      }
-
-      $iterator->rewind();
-      $iterator->next();
-      $this->docConfFile = $iterator->current()->getRealPath();
-    }
-    elseif(is_string($docConfFile)){
-      if(!is_file($docConfFile)){
-        throw new \InvalidArgumentException("The documentation configuration file was not found.");
-      }
-
-      $this->docConfFile = $docConfFile;
-    }
+    $this->docConfFile = $docConfFile;
   }
 
   /**
