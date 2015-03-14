@@ -44,15 +44,16 @@ class Project extends Container
    */
   public function __construct(Configuration $configuration)
   {
-    $this->_registerBindings();// conflict with parent class method
 
     $this->configuration = $configuration;// build_path should exist
     $this->fileSystem = $this->make('Illuminate\Filesystem\Filesystem');
-    $this->parser = $this->make('RAFIE\\Contracts\\ParserContracts');
     $this->themeCollection = new ThemeCollection($this->configuration->getOptions()['themesPaths']);//test isset
 
+    $this->_registerBindings();// conflict with parent class method
     $this->loadTheme();
 
+    // must after registerBindings
+    $this->parser = $this->make('parser');
   }
 
   /**
@@ -90,10 +91,27 @@ class Project extends Container
   public function _registerBindings()
   {
     $pro = $this;
+    $options = $this->configuration->getOptions();
 
-    $this->singleton('RAFIE\\Contracts\\ParserContracts', function () {
-      return new \RAFIE\Parser\MarkdownParser(new \Michelf\Markdown());
-    });
+    if (isset($options['parser'])) {
+      if (!class_exists($options['parser'])) {
+        throw new \InvalidArgumentException(sprintf("The `%s class doesn't exist.", $options['parser']));
+
+      }
+      if (!method_exists($options['parser'], 'parse')) {
+        // we may change this test, and only require it to be an instance of Contracts\ParserContract
+        throw new \InvalidArgumentException(sprintf("The `%s class must have a `parse` method.", $options['parser']));
+      }
+
+      $this->singleton('parser', function ($app) use ($options) {
+        return $app->make($options['parser']);
+      });
+    } else {
+      $this->singleton('parser', function ($app) {
+        return $app->make('\\RAFIE\\Parser\\MarkdownParser');
+      });
+    }
+
 
     $this->singleton('twig', function () use ($pro) {
       $twig = new \Twig_Environment(new \Twig_Loader_Filesystem('/'), [
@@ -135,8 +153,8 @@ class Project extends Container
     $this->initDirectory($buildPath);
     $this->copyAssets($buildPath);
 
-    $navigation = $this->loadNavigation($buildPath);
     $iterator = $this->configuration->getFinder()->getIterator();
+    $navigation = $this->loadNavigation($this->configuration->getFinder());
 
     foreach ($iterator as $file) {
       $content = $this->parser->parse($file->getContents());
@@ -179,6 +197,9 @@ class Project extends Container
     $this->fileSystem->put($path . '/' . $fileName, $viewContent);
   }
 
+  /**
+   * @param string $buildPath
+   */
   protected function copyAssets($buildPath)
   {
     $assets = $this->theme->getValue()['assets'] ?: [];
@@ -196,12 +217,23 @@ class Project extends Container
 
   }
 
+  /**
+   * @param \Symfony\Component\Finder\Finder $finder
+   * @return array
+   */
   protected function loadNavigation($finder)
   {
+    // if doc.yml doesn't exist
     $doc = (new Parser())->parse(file_get_contents($this->configuration->getDocConfFile()));
 
     if (!isset($doc['navigation'])) {
-      // load from structure
+      $navigation = [];
+      $iterator = $finder->getIterator();
+      foreach ($iterator as $item) {
+        $navigation[$item->getRelativePathname()] = $item->getFilename();
+      }
+
+      return $navigation;
     }
 
     return $doc['navigation'];
